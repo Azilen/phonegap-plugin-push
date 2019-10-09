@@ -241,19 +241,37 @@
                     id category = [categoryOptions objectForKey:key];
 
                     id yesButton = [category objectForKey:@"yes"];
+                   
                     UNNotificationAction *yesAction;
                     if (yesButton != nil && [yesButton  isKindOfClass:[NSDictionary class]]) {
-                        yesAction = [self createAction: yesButton];
+                         id isInline = [yesButton objectForKey:@"inline"];
+                         if (isInline != nil && (([isInline isKindOfClass:[NSString class]] && [isInline isEqualToString:@"true"]) || [isInline boolValue])) {
+                            yesAction = [self createReplyAction: yesButton];
+                        }else{
+                            yesAction = [self createAction: yesButton];
+                        }
                     }
                     id noButton = [category objectForKey:@"no"];
+                   
                     UNNotificationAction *noAction;
                     if (noButton != nil && [noButton  isKindOfClass:[NSDictionary class]]) {
-                        noAction = [self createAction: noButton];
+                        id isInline = [noButton objectForKey:@"inline"];
+                        if (isInline != nil && (([isInline isKindOfClass:[NSString class]] && [isInline isEqualToString:@"true"]) || [isInline boolValue])) {
+                            noAction = [self createReplyAction: noButton];
+                        }else{
+                            noAction = [self createAction: noButton];
+                        }
                     }
                     id maybeButton = [category objectForKey:@"maybe"];
+                   
                     UNNotificationAction *maybeAction;
                     if (maybeButton != nil && [maybeButton  isKindOfClass:[NSDictionary class]]) {
-                        maybeAction = [self createAction: maybeButton];
+                        id  isInline = [maybeButton objectForKey:@"inline"];
+                        if (isInline != nil && (([isInline isKindOfClass:[NSString class]] && [isInline isEqualToString:@"true"]) || [isInline boolValue])) {
+                            maybeAction = [self createReplyAction: maybeButton];
+                        }else{
+                            maybeAction = [self createAction: maybeButton];
+                        }
                     }
 
                     // Identifier to include in your push payload and local notification
@@ -353,6 +371,23 @@
     }
 
     return [UNNotificationAction actionWithIdentifier:identifier title:title options:options];
+}
+
+- (UNTextInputNotificationAction *)createReplyAction:(NSDictionary *)dictionary {
+    
+    
+    replyCallBack = [dictionary objectForKey:@"callback"];
+    id mode =[dictionary objectForKey:@"foreground"];
+    UNNotificationActionOptions effectiveMode;
+    if (mode == nil || ([mode isKindOfClass:[NSString class]] && [mode isEqualToString:@"false"]) || ![mode boolValue]) {
+        effectiveMode = UNNotificationActionOptionNone;
+    } else {
+        effectiveMode = UNNotificationActionOptionNone;
+    }
+    
+    UNTextInputNotificationAction *myAction = [UNTextInputNotificationAction actionWithIdentifier:[dictionary objectForKey:@"callback"] title:[dictionary objectForKey:@"title"] options:effectiveMode];
+    
+    return myAction;
 }
 
 - (void)didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
